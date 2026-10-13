@@ -22,8 +22,8 @@ add_action('wp_head',function(){
 function adi_setting($key){
  $defaults=array(
  'adi_hero_name'=>'Adithya Kamaraj',
- 'adi_about_title'=>'A researcher. A maker. Always a beginner at something.',
- 'adi_about_copy'=>'I’m a doctoral researcher at BFH Business School, exploring how AI shapes our perceptions of price fairness. Before research, I worked with startups and innovation teams. The thread through it all? Understanding people, asking better questions, and turning ideas into something useful.',
+ 'adi_about_title'=>'A researcher. A Design Thinker. Always looking  to solve problems.',
+ 'adi_about_copy'=>'I’m a doctoral researcher at BFH Business School and USI Lugano, exploring how AI shapes our perceptions of price fairness. Before research, I worked with startups and innovation teams. The thread through it all? Understanding people, asking right questions, and turning ideas into value.',
  'adi_contact_email'=>'adithya.kamaraj@gmail.com',
  'adi_contact_note'=>'Research collaborations, interesting AI projects, or a startup problem worth exploring. I’m open to thoughtful conversations and selected pro bono collaborations.',
  'adi_linkedin'=>'https://www.linkedin.com/in/adithya-kamaraj/',
@@ -41,7 +41,7 @@ function adi_arrow($direction='up'){$p='down'===$direction?'M12 4v16m-6-6 6 6 6-
 function adi_spark(){return '<svg viewBox="0 0 100 100" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="8" aria-hidden="true"><path d="M50 8v28M50 64v28M8 50h28M64 50h28M20 20l20 20M60 60l20 20M20 80l20-20M60 40l20-20"/></svg>';}
 function adi_space_info($slug){$s=array(
  'design-ai'=>array('name'=>'Technology & AI','number'=>'02','copy'=>'Ideas made tangible. Products, prototypes, and experiments at the meeting point of people and technology.'),
- 'research'=>array('name'=>'Research','number'=>'01','copy'=>'Evidence before answers. My PhD explores AI, pricing, and how people decide what feels fair.'),
+ 'research'=>array('name'=>'Research & Insights','number'=>'01','copy'=>'Evidence before answers. My PhD explores AI, pricing, and how people decide what feels fair.'),
  'startups-business'=>array('name'=>'Business & Innovation','number'=>'03','copy'=>'From possibility to a practical next step. Customer development, innovation, and startup collaborations.'));return $s[$slug]??$s['design-ai'];}
 function adi_space_url($slug){$t=get_term_by('slug',$slug,'adi_space');if(!$t){return adi_projects_url();}$u=get_term_link($t);return is_wp_error($u)?adi_projects_url():$u;}
 function adi_visual($kind,$class=''){get_template_part('template-parts/visual',null,array('kind'=>$kind,'class'=>$class));}
