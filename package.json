@@ -1,0 +1,15 @@
+{
+  "name": "adithya-personal-website",
+  "version": "2.0.0",
+  "private": true,
+  "description": "WordPress theme and content plugin; Node is only used for local browser checks.",
+  "scripts": {
+    "check": "node scripts/verify-site.cjs",
+    "package": "python3 scripts/package.py",
+    "preview": "node scripts/preview-site.cjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.11.1",
+    "playwright": "1.62.1"
+  }
+}

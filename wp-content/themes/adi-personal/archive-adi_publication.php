@@ -1,0 +1,1 @@
+<?php get_header(); ?><main id="main" class="wrap"><section class="page-hero"><p class="eyebrow">Research</p><h1>Evidence, in print.</h1><p class="page-intro">Conference contributions and research records on AI and price fairness.</p></section><?php adi_publications(true); ?></main><?php get_footer(); ?>

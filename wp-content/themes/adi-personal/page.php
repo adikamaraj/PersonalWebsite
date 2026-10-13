@@ -1,0 +1,1 @@
+<?php get_header(); ?><main id="main" class="wrap"><?php while ( have_posts() ) : the_post(); ?><article class="single-entry"><header class="article-header"><p class="eyebrow">A little more</p><h1><?php the_title(); ?></h1></header><div class="entry-content article-body"><?php the_content(); wp_link_pages(); ?></div></article><?php endwhile; ?></main><?php get_footer(); ?>

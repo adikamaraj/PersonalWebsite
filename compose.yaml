@@ -1,0 +1,40 @@
+services:
+  db:
+    # MariaDB 11.4.13, pinned to the verified image digest.
+    image: mariadb@sha256:1292844148b311e4ed4300022a996d39083f415a963e970cf47cad1b3b18e3a6
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${WP_DB_NAME:-wordpress}
+      MARIADB_USER: ${WP_DB_USER:-wp_local}
+      MARIADB_PASSWORD: ${WP_DB_PASSWORD:?Copy .env.example to .env and set a local password}
+      MARIADB_ROOT_PASSWORD: ${WP_DB_ROOT_PASSWORD:?Copy .env.example to .env and set a local root password}
+    volumes:
+      - database:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  wordpress:
+    # WordPress 7.1.3 on PHP 8.3 with Apache, pinned to the verified image digest.
+    image: wordpress@sha256:f32ffa85064d9c951b7b69c929fa2a9f682aa4443e0c0a56ac2000499cb64383
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${WP_DB_NAME:-wordpress}
+      WORDPRESS_DB_USER: ${WP_DB_USER:-wp_local}
+      WORDPRESS_DB_PASSWORD: ${WP_DB_PASSWORD:?Copy .env.example to .env and set a local password}
+    volumes:
+      - wordpress:/var/www/html
+      - ./wp-content/themes/adi-personal:/var/www/html/wp-content/themes/adi-personal
+      - ./wp-content/plugins/adi-site-content:/var/www/html/wp-content/plugins/adi-site-content
+
+volumes:
+  database:
+  wordpress:
