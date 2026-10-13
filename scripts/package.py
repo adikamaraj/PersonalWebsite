@@ -6,8 +6,8 @@ ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = ROOT / 'releases'
 OUTPUT.mkdir(exist_ok=True)
 for source, name in [
-    (ROOT / 'wp-content/themes/adi-personal', 'adi-personal-2.0.0.zip'),
-    (ROOT / 'wp-content/plugins/adi-site-content', 'adi-site-content-1.0.0.zip'),
+    (ROOT / 'wp-content/themes/adi-personal', 'adi-personal-2.1.0.zip'),
+    (ROOT / 'wp-content/plugins/adi-site-content', 'adi-site-content-1.1.0.zip'),
 ]:
     target = OUTPUT / name
     with ZipFile(target, 'w', compression=ZIP_DEFLATED, compresslevel=9) as archive:

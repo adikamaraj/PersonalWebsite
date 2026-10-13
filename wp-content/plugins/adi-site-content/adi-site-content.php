@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Adi Site Content
  * Description: Portable portfolio and publication content for Adithya Kamaraj, with an optional starter-content importer.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: Adithya Kamaraj
  * License: GPL-2.0-or-later
  * Requires PHP: 8.0
@@ -34,6 +34,21 @@ function adi_content_register() {
 	}
 }
 add_action( 'init', 'adi_content_register' );
+/** Rename the original spaces once, keeping slugs and project assignments intact. */
+function adi_content_update_spaces() {
+ if ('2' === get_option('adi_content_space_version')) { return; }
+ $names = array('research'=>'Research', 'design-ai'=>'Technology & AI', 'startups-business'=>'Business & Innovation');
+ foreach ($names as $slug=>$name) {
+  $term = get_term_by('slug', $slug, 'adi_space');
+  if ($term) {
+   $result = wp_update_term($term->term_id, 'adi_space', array('name'=>$name));
+   if (is_wp_error($result)) { return; }
+  }
+ }
+ update_option('adi_content_space_version', '2');
+}
+add_action('init', 'adi_content_update_spaces', 20);
+
 register_activation_hook( __FILE__, function() { adi_content_register(); flush_rewrite_rules(); } );
 register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
 

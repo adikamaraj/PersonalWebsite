@@ -9,6 +9,6 @@ Prepared from the CV supplied by Adithya Kamaraj and public BFH pages reviewed o
 
 The PhD is presented as ongoing. The conference records are labelled conference contributions, rather than journal articles. Startup outcomes are described as collaborative work with a clearly stated internship role. Claims about increased market presence, engagement, and efficiency from the old CV were omitted until they can be substantiated in fuller case studies.
 
-Three suggested essay topics are imported as drafts. The public Writing page displays interests until Adithya publishes an article. The pricing playground is a hypothetical illustration and does not assert a research finding.
+Three suggested essay topics are imported as drafts. The public Writing page displays interests until Adithya publishes an article. The Home page brings the introduction, geography, scientific contributions, selected work, and biography together.
 
 The six external visual references informed original layouts and interaction concepts. Their source code, font files, photography, and other assets were not copied. Reference investigation evidence remains in the workspace's separate `reference-analysis` directory.

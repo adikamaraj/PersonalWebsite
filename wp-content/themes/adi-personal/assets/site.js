@@ -64,55 +64,6 @@
       );
     });
 
-  const range = document.querySelector("#price-range");
-  range?.addEventListener("input", () => {
-    const price = Number(range.value);
-    document.querySelector("#ai-price").textContent = `€${price}`;
-    range.setAttribute("aria-valuetext", `€${price}`);
-    document.querySelector("#price-caption").textContent =
-      price === 20
-        ? "Same price. Different decision-maker."
-        : price > 20
-          ? `€${price - 20} more. Does the decision-maker matter?`
-          : `€${20 - price} less. Does a lower price feel different?`;
-  });
-  const robot = document.querySelector(".robot-tool");
-  const robotButton = document.querySelector(".robot-button");
-  robotButton?.addEventListener("click", () => {
-    const awake = robot.classList.toggle("is-awake");
-    robotButton.setAttribute("aria-pressed", String(awake));
-    robotButton.innerHTML = `${awake ? "Let the robot rest" : "Wake up the robot"} <span aria-hidden="true">↗︎</span>`;
-    robot.querySelector(".robot-status").textContent = awake
-      ? "Online. Curious. Still no closer to making coffee."
-      : "Currently contemplating its next coffee.";
-  });
-  robot?.addEventListener("pointermove", (event) => {
-    if (!robot.classList.contains("is-awake") || motion.matches) return;
-    const rect = robot.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width - 0.5) * 7;
-    const y = ((event.clientY - rect.top) / rect.height - 0.5) * 5;
-    robot.querySelectorAll(".robot-eye").forEach((eye) => {
-      eye.style.translate = `${x}px ${y}px`;
-    });
-  });
-  robot?.addEventListener("pointerleave", () =>
-    robot.querySelectorAll(".robot-eye").forEach((eye) => {
-      eye.style.translate = "";
-    }),
-  );
-  const questions = [
-    "Who needs this enough to change what they do?",
-    "What assumption could we test before we build?",
-    "What would make a customer trust this?",
-    "What is the smallest experiment that could teach us something?",
-    "Which decision will this evidence help us make?",
-  ];
-  let question = 0;
-  document.querySelector(".question-button")?.addEventListener("click", () => {
-    question = (question + 1) % questions.length;
-    document.querySelector("#startup-question").textContent =
-      questions[question];
-  });
   document
     .querySelector("[data-copy-link]")
     ?.addEventListener("click", async (event) => {
@@ -137,11 +88,13 @@
     germany: { lat: 50.78, lon: 6.08, label: "AACHEN" },
     switzerland: { lat: 46.95, lon: 7.45, label: "BERN" },
   };
-  let selected = "india",
-    yaw = 65,
-    targetYaw = 65,
-    latitude = 20,
-    targetLatitude = 20;
+  let selected = countries[globeWrap.dataset.initialPlace]
+    ? globeWrap.dataset.initialPlace
+    : "india";
+  let yaw = countries[selected].lon - 10,
+    targetYaw = yaw,
+    latitude = countries[selected].lat - 5,
+    targetLatitude = latitude;
   let points = [],
     size = 480,
     visible = true,

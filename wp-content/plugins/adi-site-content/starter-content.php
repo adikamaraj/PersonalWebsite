@@ -33,7 +33,7 @@ function adi_content_import() {
 	if ( $home && $writing ) {
 		update_option( 'show_on_front', 'page' ); update_option( 'page_on_front', $home ); update_option( 'page_for_posts', $writing );
 	}
-	$spaces = array( 'design-ai' => 'Design & AI', 'research' => 'Research', 'startups-business' => 'Startups & Business' );
+	$spaces = array( 'research' => 'Research', 'design-ai' => 'Technology & AI', 'startups-business' => 'Business & Innovation' );
 	$term_ids = array();
 	foreach ( $spaces as $slug => $name ) {
 		$term = term_exists( $slug, 'adi_space' );

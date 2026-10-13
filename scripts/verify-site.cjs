@@ -92,8 +92,8 @@ async function accessibility(page, label) {
   assert.equal(await page.locator(".project-card:visible").count(), 6);
   for (const [name, count] of [
     ["Research", 2],
-    ["Design & AI", 2],
-    ["Startups & business", 2],
+    ["Technology & AI", 2],
+    ["Business & Innovation", 2],
     ["All work", 6],
   ]) {
     await page
@@ -106,23 +106,58 @@ async function accessibility(page, label) {
       name,
     );
   }
-  await page.locator("#price-range").focus();
-  await page.keyboard.press("ArrowRight");
-  assert.equal(await page.locator("#ai-price").textContent(), "€21");
-  await page.getByRole("button", { name: "Wake up the robot" }).click();
+  assert.equal(await page.locator(".playground").count(), 0);
+  assert.equal(await page.locator(".venn-diagram circle").count(), 4);
   assert.equal(
-    await page.locator(".robot-button").getAttribute("aria-pressed"),
-    "true",
+    await page
+      .getByRole("img", { name: "Research, Technology, and Business" })
+      .isVisible(),
+    true,
   );
-  const question = await page.locator("#startup-question").textContent();
-  await page.getByRole("button", { name: "Another question" }).click();
-  assert.notEqual(
-    await page.locator("#startup-question").textContent(),
-    question,
+  const order = await page
+    .locator("main > section")
+    .evaluateAll((nodes) =>
+      nodes.map((node) =>
+        [...node.classList].find((name) =>
+          [
+            "intro-hero",
+            "spaces-section",
+            "publications",
+            "work-section",
+            "biography",
+            "writing-section",
+          ].includes(name),
+        ),
+      ),
+    );
+  assert.deepEqual(order, [
+    "intro-hero",
+    "spaces-section",
+    "publications",
+    "work-section",
+    "biography",
+    "writing-section",
+  ]);
+  assert.deepEqual(await page.locator(".space-card h3").allTextContents(), [
+    "Research",
+    "Technology & AI",
+    "Business & Innovation",
+  ]);
+  assert.equal(await page.locator("#contributions .publication").count(), 2);
+  assert.equal(
+    await page
+      .getByRole("heading", {
+        name: "Engineering, entrepreneurship, and a lot of questions.",
+      })
+      .isVisible(),
+    true,
   );
+  const homeTab = page
+    .locator(".view-switch")
+    .getByRole("link", { name: "Home", exact: true });
+  assert.equal(await homeTab.getAttribute("aria-current"), "page");
   await accessibility(page, "Homepage");
 
-  await load(page, "/about/");
   await page.locator(".globe-wrap").scrollIntoViewIfNeeded();
   await page.waitForSelector(".globe-wrap.is-rendered");
   for (const [name, city] of [
@@ -137,8 +172,25 @@ async function accessibility(page, label) {
     );
     assert.equal(await page.locator(".place-panel:visible").count(), 1);
   }
-  await accessibility(page, "About");
-  await load(page, "/projects/");
+  await accessibility(page, "Home geography");
+  await load(page, "/about/");
+  assert.equal(
+    page.url(),
+    base + "/#story",
+    "Older About links lead to the biography on Home",
+  );
+  await page
+    .locator(".view-switch")
+    .getByRole("link", { name: "Projects", exact: true })
+    .click();
+  assert.equal(page.url(), base + "/projects/");
+  assert.equal(
+    await page
+      .locator(".view-switch")
+      .getByRole("link", { name: "Projects", exact: true })
+      .getAttribute("aria-current"),
+    "page",
+  );
   assert.equal(await page.locator(".project-card").count(), 7);
   await load(page, "/spaces/research/");
   assert.equal(await page.locator(".project-card").count(), 2);
@@ -247,7 +299,7 @@ async function accessibility(page, label) {
     "No browser errors or failed local asset requests",
   );
   console.log(
-    "Passed: real WordPress routes, editing/publishing, filters, tools, map, search, keyboard menu, no-JS navigation, 320/390/768/1440px layouts, and axe accessibility checks.",
+    "Passed: real WordPress routes, editing/publishing, section order, navigation, Venn diagram, filters, map, search, keyboard menu, no-JS navigation, 320/390/768/1440px layouts, and axe accessibility checks.",
   );
 })()
   .catch((error) => {

@@ -24,7 +24,6 @@ const base = process.env.WP_BASE_URL || "http://127.0.0.1:8080";
       const page = await context.newPage();
       for (const [name, route] of [
         ["home", "/"],
-        ["about", "/about/"],
         ["projects", "/projects/"],
         ["writing", "/writing/"],
         ["case", "/projects/when-ai-sets-the-price/"],
@@ -35,7 +34,7 @@ const base = process.env.WP_BASE_URL || "http://127.0.0.1:8080";
         if (response.status() !== 200)
           throw new Error(`${route}: HTTP ${response.status()}`);
         await page.evaluate(() => document.fonts.ready);
-        if (name === "about") {
+        if (name === "home") {
           await page.locator(".globe-wrap").scrollIntoViewIfNeeded();
           await page.waitForSelector(".globe-wrap.is-rendered");
           await page.evaluate(() => window.scrollTo(0, 0));
