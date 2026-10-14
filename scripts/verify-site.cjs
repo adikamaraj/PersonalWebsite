@@ -188,6 +188,13 @@ async function accessibility(page, label) {
   );
 }
 (async () => {
+  console.log(
+    php(
+      fs
+        .readFileSync(path.join(__dirname, "verify-messaging.php"), "utf8")
+        .replace(/^<\?php\s*/, ""),
+    ).trim(),
+  );
   assert.equal(
     Number(php("echo adi_content_import();").trim()),
     0,

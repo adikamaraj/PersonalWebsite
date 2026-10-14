@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Adi Site Content
  * Description: Portable portfolio and publication content for Adithya Kamaraj, with an optional starter-content importer.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: Adithya Kamaraj
  * License: GPL-2.0-or-later
  * Requires PHP: 8.0
@@ -93,6 +93,15 @@ add_action( 'admin_menu', function() {
 } );
 function adi_content_setup_page() {
 	if ( ! current_user_can( 'manage_options' ) ) { return; }
+	if ( isset( $_POST['adi_apply_messaging'] ) ) {
+		check_admin_referer( 'adi_apply_messaging' );
+		$result = adi_content_apply_messaging_defaults();
+		if (is_wp_error($result)) {
+			echo '<div class="notice notice-error"><p>'.esc_html($result->get_error_message()).'</p></div>';
+		} else {
+			echo '<div class="notice notice-success"><p>Updated messaging applied. Clear the Bluehost site cache, then reload your homepage.</p></div>';
+		}
+	}
 	if ( isset( $_POST['adi_import'] ) ) {
 		check_admin_referer( 'adi_import_content' );
 		$result = adi_content_import();
@@ -101,6 +110,9 @@ function adi_content_setup_page() {
 	echo '<div class="wrap"><h1>Adi site setup</h1><p>Create your Home, About and Writing pages, six portfolio cases, and two conference publication records. Three suggested essays are saved as drafts for your review.</p><p>This sets Home as the front page and Writing as the posts page. It adds missing content, preserves existing entries, and can be run again. Review the imported profile before publishing the site.</p><form method="post">';
 	wp_nonce_field( 'adi_import_content' );
 	submit_button( 'Create starter content', 'primary', 'adi_import' );
+	echo '</form><hr><h2>Apply updated messaging</h2><p>Use the current Adi Personal theme defaults for the professional descriptor, Home headline, introduction and collaboration copy. This replaces saved Customizer values for those fields and keeps a backup. Your name, email, location and profile links are preserved.</p><form method="post">';
+	wp_nonce_field('adi_apply_messaging');
+	submit_button('Apply updated messaging', 'secondary', 'adi_apply_messaging');
 	echo '</form></div>';
 }
 

@@ -1,9 +1,68 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
+/** Compare paragraph words independently of editor whitespace, classes and entities. */
+function adi_content_paragraph_key($html) {
+    return trim(preg_replace('/\s+/u', ' ', html_entity_decode(wp_strip_all_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+}
+
+/** Replace known biography paragraphs while retaining Gutenberg blocks and styling. */
+function adi_content_update_biography_paragraphs($content, $replacements) {
+    $paragraphs = array();
+    foreach ($replacements as $old=>$new) {
+        if (!preg_match('~<p>(.*?)</p>~s', $old, $match)) { continue; }
+        preg_match_all('~<p>(.*?)</p>~s', $new, $replacement);
+        $paragraphs[adi_content_paragraph_key($match[1])] = $replacement[1];
+    }
+    $changed = false;
+    $walk = function($blocks) use (&$walk, &$changed, $paragraphs) {
+        $result = array();
+        foreach ($blocks as $block) {
+            if ('core/paragraph' === $block['blockName'] && !$block['innerBlocks'] && preg_match('~(<p\b[^>]*>)(.*?)(</p>)~s', $block['innerHTML'], $match)) {
+                $key = adi_content_paragraph_key($match[2]);
+                if (isset($paragraphs[$key])) {
+                    foreach ($paragraphs[$key] as $text) {
+                        $next = $block;
+                        $next['innerHTML'] = str_replace($match[0], $match[1].$text.$match[3], $block['innerHTML']);
+                        $next['innerContent'] = array($next['innerHTML']);
+                        $result[] = $next;
+                    }
+                    $changed = true;
+                    continue;
+                }
+            } elseif (null === $block['blockName'] || 'core/freeform' === $block['blockName']) {
+                $replace = function($match) use ($paragraphs, &$changed) {
+                    $key = adi_content_paragraph_key($match[2]);
+                    if (!isset($paragraphs[$key])) { return $match[0]; }
+                    $changed = true;
+                    return implode("\n\n", array_map(function($text) use ($match) { return $match[1].$text.$match[3]; }, $paragraphs[$key]));
+                };
+                $block['innerHTML'] = preg_replace_callback('~(<p\b[^>]*>)(.*?)(</p>)~s', $replace, $block['innerHTML']);
+                $block['innerContent'] = array_map(function($html) use ($replace) { return null === $html ? null : preg_replace_callback('~(<p\b[^>]*>)(.*?)(</p>)~s', $replace, $html); }, $block['innerContent']);
+            }
+            if ($block['innerBlocks']) {
+                $children = array();
+                $chunks = array();
+                $index = 0;
+                foreach ($block['innerContent'] as $html) {
+                    if (null !== $html) { $chunks[] = $html; continue; }
+                    $updated = $walk(array($block['innerBlocks'][$index++]));
+                    foreach ($updated as $child) { $children[] = $child; $chunks[] = null; }
+                }
+                $block['innerBlocks'] = $children;
+                $block['innerContent'] = $chunks;
+            }
+            $result[] = $block;
+        }
+        return $result;
+    };
+    $blocks = $walk(parse_blocks($content));
+    return $changed ? serialize_blocks($blocks) : $content;
+}
+
 /** Upgrade only known starter fragments; preserve edits, URLs, terms and publication records. */
 function adi_content_update_messaging() {
-    if ('1.2.0' === get_option('adi_messaging_content_version')) { return; }
+    if ('1.2.1' === get_option('adi_messaging_content_version')) { return; }
     $replacements = array(
         'about' => array(
             '<!-- wp:paragraph --><p>I’m Adithya Kamaraj, a doctoral researcher at BFH Business School’s Institute for Marketing &amp; Global Management. My PhD, in collaboration with USI Università della Svizzera italiana, explores how consumers perceive price fairness when AI is involved in marketplace decisions and interactions.</p><!-- /wp:paragraph -->' => '<!-- wp:paragraph --><p>I\'m Adithya Kamaraj, a doctoral researcher at BFH Business School\'s Institute for Marketing &amp; Global Management. My PhD, in collaboration with USI Università della Svizzera italiana, investigates consumer behaviour and perceptions of fairness in AI-driven marketplace interactions.</p><!-- /wp:paragraph -->',
@@ -41,18 +100,31 @@ function adi_content_update_messaging() {
         $post = $posts[0];
         $update = array('ID'=>$post->ID);
         $content = strtr($post->post_content, $replacements[$key] ?? array());
+        if ('about' === $key) { $content = adi_content_update_biography_paragraphs($content, $replacements[$key]); }
         if ($content !== $post->post_content) { $update['post_content'] = $content; }
         if (isset($excerpts[$key]) && $post->post_excerpt === $excerpts[$key][0]) { $update['post_excerpt'] = $excerpts[$key][1]; }
         if (isset($order[$key]) && (int)$post->menu_order !== $order[$key]) { $update['menu_order'] = $order[$key]; }
         if (count($update) === 1) { continue; }
         // Retain the original fields privately, including Order which WP revisions omit.
-        if (!metadata_exists('post', $post->ID, '_adi_messaging_backup_1_2_0')) {
-            add_post_meta($post->ID, '_adi_messaging_backup_1_2_0', array('post_content'=>$post->post_content, 'post_excerpt'=>$post->post_excerpt, 'menu_order'=>$post->menu_order), true);
+        if (!metadata_exists('post', $post->ID, '_adi_messaging_backup_1_2_1')) {
+            add_post_meta($post->ID, '_adi_messaging_backup_1_2_1', array('post_content'=>$post->post_content, 'post_excerpt'=>$post->post_excerpt, 'menu_order'=>$post->menu_order), true);
         }
         wp_save_post_revision($post->ID);
         $result = wp_update_post(wp_slash($update), true);
         if (is_wp_error($result)) { return; }
     }
-    update_option('adi_messaging_content_version', '1.2.0', false);
+    update_option('adi_messaging_content_version', '1.2.1', false);
 }
 add_action('init', 'adi_content_update_messaging', 30);
+
+/** Explicit admin action: use the installed theme's copy instead of saved overrides. */
+function adi_content_apply_messaging_defaults() {
+    if (!current_user_can('manage_options')) { return new WP_Error('adi_permission', 'Administrator access is required.'); }
+    if ('adi-personal' !== get_template()) { return new WP_Error('adi_theme', 'Activate the Adi Personal theme first.'); }
+    $keys = array('adi_hero_descriptor', 'adi_about_title', 'adi_about_copy', 'adi_collaboration_note', 'adi_contact_title', 'adi_contact_note');
+    $saved = array_intersect_key(get_theme_mods() ?: array(), array_fill_keys($keys, true));
+    add_option('adi_messaging_theme_backup_2_2_0', $saved, '', false);
+    foreach ($keys as $key) { remove_theme_mod($key); }
+    adi_content_update_messaging();
+    return true;
+}

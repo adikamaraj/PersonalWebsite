@@ -10,14 +10,14 @@ A responsive WordPress portfolio at the intersection of AI, consumer behaviour, 
 
 You need an existing WordPress installation running PHP 8.0 or newer. These packages require no Node.js, build service, or Webflow subscription on your hosting.
 
-1. Download [Adi Site Content](releases/adi-site-content-1.2.0.zip) and [Adi Personal theme](releases/adi-personal-2.2.0.zip). On GitHub, open the file and use **Download raw file**.
+1. Download [Adi Site Content](releases/adi-site-content-1.2.1.zip) and [Adi Personal theme](releases/adi-personal-2.2.0.zip). On GitHub, open the file and use **Download raw file**.
 2. Open your site's WordPress administration from Bluehost. Under **Plugins → Add New → Upload Plugin**, upload the content plugin, install it, and activate it.
 3. Under **Appearance → Themes → Add New → Upload Theme**, upload the theme, install it, and activate **Adi Personal**.
 4. Open **Tools → Adi site setup** and choose **Create starter content**. This creates the pages, portfolio records, and conference entries, sets Home and Writing as the site's front/posts pages, and saves suggested essays as drafts. Running it again adds missing records without overwriting existing ones. The untouched default “Hello world!” post is moved to drafts.
 5. Review your profile and contact information under **Appearance → Customize → Personal site**. Review the Home introduction, biography content, and portfolio cases in the editor before sharing the site.
 6. If you change permalink settings, open **Settings → Permalinks** and save them. Clear Bluehost's cache after updating the theme or content.
 
-**Updating an existing site:** upload both ZIPs and choose **Replace current with uploaded**. Content plugin 1.2.0 applies the requested project order and replaces known starter paragraphs and excerpts once. It preserves other edits, record IDs, URLs, categories and publication metadata, and keeps the original updated fields in private post metadata. Customizer overrides remain editable under **Appearance → Customize → Personal site**; review them if they still show your earlier headline or invitation. Clear Bluehost's cache after replacing the packages.
+**Updating an existing site:** upload both ZIPs and choose **Replace current with uploaded**. Content plugin 1.2.1 applies the requested project order and replaces known starter paragraphs and excerpts once, including biographies reformatted by the WordPress editor. It preserves other edits, record IDs, URLs, categories and publication metadata, and keeps the original updated fields in private post metadata. If your hero still shows old text, open **Tools → Adi site setup → Apply updated messaging**. This replaces saved Customizer copy with the installed theme defaults and keeps a backup; your name, email, location and profile links are preserved. Clear Bluehost's cache after updating. Sites already running theme 2.2.0 only need the updated plugin.
 
 ## Edit the site
 

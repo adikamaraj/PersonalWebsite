@@ -7,7 +7,7 @@ OUTPUT = ROOT / 'releases'
 OUTPUT.mkdir(exist_ok=True)
 for source, name in [
     (ROOT / 'wp-content/themes/adi-personal', 'adi-personal-2.2.0.zip'),
-    (ROOT / 'wp-content/plugins/adi-site-content', 'adi-site-content-1.2.0.zip'),
+    (ROOT / 'wp-content/plugins/adi-site-content', 'adi-site-content-1.2.1.zip'),
 ]:
     target = OUTPUT / name
     with ZipFile(target, 'w', compression=ZIP_DEFLATED, compresslevel=9) as archive:
