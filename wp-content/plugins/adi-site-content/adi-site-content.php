@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Adi Site Content
  * Description: Portable portfolio and publication content for Adithya Kamaraj, with an optional starter-content importer.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: Adithya Kamaraj
  * License: GPL-2.0-or-later
  * Requires PHP: 8.0
@@ -86,6 +86,7 @@ add_action( 'save_post_adi_project', 'adi_content_save_meta' );
 add_action( 'save_post_adi_publication', 'adi_content_save_meta' );
 
 require_once __DIR__ . '/starter-content.php';
+require_once __DIR__ . '/content-updates.php';
 
 add_action( 'admin_menu', function() {
 	add_management_page( 'Adi site setup', 'Adi site setup', 'manage_options', 'adi-site-setup', 'adi_content_setup_page' );

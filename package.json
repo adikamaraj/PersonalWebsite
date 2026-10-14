@@ -1,6 +1,6 @@
 {
   "name": "adithya-personal-website",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "private": true,
   "description": "WordPress theme and content plugin; Node is only used for local browser checks.",
   "scripts": {

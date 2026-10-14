@@ -78,7 +78,7 @@
       }
     });
 
-  // An accessible country selector controls a locally rendered, decorative globe.
+  // Native controls share one renderer: country camera easing plus a full globe turn.
   const globeWrap = document.querySelector(".globe-wrap");
   if (!globeWrap) return;
   const canvas = globeWrap.querySelector("canvas");
@@ -100,6 +100,11 @@
     visible = true,
     frame = 0,
     lastTime = 0;
+  let spin = null,
+    spinOffset = 0,
+    queuedSpin = false;
+  const spinDuration = 1500;
+  const spinStatus = document.querySelector(".globe-status");
   const rad = Math.PI / 180;
   const buttons = [...document.querySelectorAll("[data-place]")];
   const panels = [...document.querySelectorAll("[data-panel]")];
@@ -132,7 +137,7 @@
   if (!context) return;
   const project = (lat, lon) => {
     const a = lat * rad,
-      b = (lon - yaw) * rad,
+      b = (lon - yaw - spinOffset) * rad,
       c = latitude * rad;
     const x = Math.cos(a) * Math.sin(b),
       y = Math.sin(a),
@@ -225,24 +230,72 @@
   }
   function animate(time) {
     frame = 0;
-    if (!visible || document.hidden || motion.matches) return;
-    const factor = Math.min(0.14, (time - lastTime || 16) / 180);
+    // Check here too: media-query change events may arrive after a scheduled frame.
+    if (motion.matches) {
+      settleForReducedMotion();
+      return;
+    }
+    if (!visible || document.hidden) return;
+    const delta = lastTime ? time - lastTime : 16;
+    const factor = Math.min(0.14, delta / 180);
     lastTime = time;
     yaw += (targetYaw - yaw) * factor;
     latitude += (targetLatitude - latitude) * factor;
+    if (Math.abs(targetYaw - yaw) <= 0.02) yaw = targetYaw;
+    if (Math.abs(targetLatitude - latitude) <= 0.02) latitude = targetLatitude;
+    if (spin) {
+      spin.elapsed += delta;
+      const t = Math.min(1, spin.elapsed / spinDuration);
+      // Smootherstep makes both ends gentle while completing a true 360° turn.
+      spinOffset = 360 * t * t * t * (10 + t * (-15 + 6 * t));
+      if (t === 1) {
+        spinOffset = 0;
+        if (queuedSpin) {
+          spin = { elapsed: 0 };
+          queuedSpin = false;
+        } else {
+          spin = null;
+          globeWrap.classList.remove("is-spinning");
+          spinStatus.textContent = "Globe back at your selected place.";
+        }
+      }
+    }
     draw();
     if (
+      spin ||
       Math.abs(targetYaw - yaw) > 0.02 ||
       Math.abs(targetLatitude - latitude) > 0.02
     )
       frame = requestAnimationFrame(animate);
   }
   function startAnimation() {
+    if (motion.matches) {
+      settleForReducedMotion();
+      return;
+    }
     if (!frame && visible && !document.hidden && !motion.matches) {
       lastTime = 0;
       frame = requestAnimationFrame(animate);
     }
   }
+  globeWrap.addEventListener("click", () => {
+    if (motion.matches) {
+      spinStatus.textContent =
+        "Rotation is disabled for reduced motion. Your selected place is unchanged.";
+      return;
+    }
+    if (spin) {
+      // Coalesce extra clicks into one more full turn; never jump or build a backlog.
+      queuedSpin = true;
+    } else {
+      spin = { elapsed: 0 };
+      spinOffset = 0;
+      globeWrap.classList.add("is-spinning");
+      spinStatus.textContent =
+        "Spinning the globe. Your selected place is unchanged.";
+    }
+    startAnimation();
+  });
   function resize() {
     size = Math.max(1, globeWrap.clientWidth);
     const scale = Math.min(window.devicePixelRatio || 1, 2);
@@ -265,14 +318,22 @@
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) startAnimation();
   });
-  motion.addEventListener("change", () => {
-    if (motion.matches) {
-      cancelAnimationFrame(frame);
-      frame = 0;
-      yaw = targetYaw;
-      latitude = targetLatitude;
-      draw();
-    } else startAnimation();
+  function settleForReducedMotion() {
+    cancelAnimationFrame(frame);
+    frame = 0;
+    yaw = targetYaw;
+    latitude = targetLatitude;
+    spin = null;
+    queuedSpin = false;
+    spinOffset = 0;
+    globeWrap.classList.remove("is-spinning");
+    spinStatus.textContent =
+      "Rotation is disabled for reduced motion. Your selected place is unchanged.";
+    draw();
+  }
+  motion.addEventListener("change", (event) => {
+    if (event.matches) settleForReducedMotion();
+    else startAnimation();
   });
   fetch(globeWrap.dataset.pointsUrl)
     .then((response) => {
@@ -286,7 +347,9 @@
           point.length === 2 &&
           point.every(Number.isFinite),
       );
+      if (!points.length) throw new Error("Map unavailable");
       resize();
+      globeWrap.disabled = false;
     })
     .catch(() => {
       globeWrap.classList.add("map-unavailable");

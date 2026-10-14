@@ -3,7 +3,7 @@ Theme Name: Adi Personal
 Theme URI: https://adikamaraj.com
 Author: Adithya Kamaraj
 Description: A minimal, responsive portfolio at the intersection of AI, research, and business. Pair with Adi Site Content.
-Version: 2.1.0
+Version: 2.2.0
 Requires at least: 6.3
 Requires PHP: 8.0
 License: GPL-2.0-or-later
@@ -618,6 +618,9 @@ a:hover {
   padding-top: 0;
 }
 .globe-wrap {
+  display: block;
+  width: 100%;
+  padding: 0;
   position: relative;
   aspect-ratio: 1;
   max-width: 560px;
@@ -630,6 +633,15 @@ a:hover {
   width: 100%;
   height: 100%;
   display: block;
+  transition: transform 220ms ease;
+}
+.globe-wrap:not(:disabled) {
+  cursor: pointer;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .globe-wrap:not(:disabled):hover .globe {
+    transform: scale(1.01);
+  }
 }
 .globe-caption {
   position: absolute;
@@ -1614,6 +1626,32 @@ a:hover {
   color: var(--muted);
   line-height: 1.9;
   max-width: 550px;
+}
+.intro-descriptor {
+  font-size: 12px;
+  font-weight: 600;
+  margin: -12px 0 18px;
+}
+.intro-collaboration {
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--muted);
+  margin-top: 14px;
+  max-width: 550px;
+}
+.publication-intro {
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--muted);
+  max-width: 750px;
+  margin-bottom: 30px;
+}
+.contact-email {
+  display: block;
+  font-size: 11px;
+  color: inherit;
+  overflow-wrap: anywhere;
+  margin-top: 12px;
 }
 .intro-links {
   display: flex;
